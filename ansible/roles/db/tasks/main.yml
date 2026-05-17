@@ -1,0 +1,69 @@
+--- # Start of db role tasks.
+# This role installs a simple PostgreSQL server.
+
+- name: Install PostgreSQL # Database server package.
+  apt: # Use apt package manager.
+    name: postgresql # Install PostgreSQL.
+    state: present # Ensure package is installed.
+
+- name: Enable and start PostgreSQL # Make DB run on boot.
+  service: # Manage system services.
+    name: postgresql # Service name.
+    state: started # Ensure it is running.
+    enabled: yes # Start on boot.
+
+- name: Set database settings (hardcoded for now)
+  set_fact:
+    pm_b_db_user: "pmb"
+    pm_b_db_password: "123"
+    pm_b_db_name: "pmb_prod"
+
+- name: Detect PostgreSQL config path
+  shell: "ls /etc/postgresql/*/main/postgresql.conf | head -n 1"
+  register: pg_conf_path
+  changed_when: false
+
+- name: Detect pg_hba.conf path
+  shell: "ls /etc/postgresql/*/main/pg_hba.conf | head -n 1"
+  register: pg_hba_path
+  changed_when: false
+
+- name: Allow PostgreSQL to listen on all interfaces
+  lineinfile:
+    path: "{{ pg_conf_path.stdout }}"
+    regexp: '^#?listen_addresses\s*=.*'
+    line: "listen_addresses = '*'"
+
+- name: Write a simple pg_hba.conf
+  copy:
+    dest: "{{ pg_hba_path.stdout }}"
+    content: |
+      # TYPE  DATABASE        USER            ADDRESS                 METHOD
+      local   all             postgres                                peer
+      local   all             all                                     peer
+      host    all             all             127.0.0.1/32            scram-sha-256
+      host    all             all             ::1/128                 scram-sha-256
+      host    {{ pm_b_db_name }} {{ pm_b_db_user }} 0.0.0.0/0 md5
+
+- name: Restart PostgreSQL to apply config
+  service:
+    name: postgresql
+    state: restarted
+
+- name: Wait for PostgreSQL TCP socket to be ready
+  become: true
+  become_user: postgres
+  shell: pg_isready -h 127.0.0.1 -p 5432
+  register: pg_isready_check
+  retries: 12
+  delay: 5
+  until: pg_isready_check.rc == 0
+  run_once: true
+
+- name: Create database user
+  shell: "psql -tAc \"SELECT 1 FROM pg_roles WHERE rolname='{{ pm_b_db_user }}'\" | grep -q 1 || psql -c \"CREATE USER {{ pm_b_db_user }} WITH PASSWORD '{{ pm_b_db_password }}';\""
+  become_user: postgres
+
+- name: Create database
+  shell: "psql -tAc \"SELECT 1 FROM pg_database WHERE datname='{{ pm_b_db_name }}'\" | grep -q 1 || psql -c \"CREATE DATABASE {{ pm_b_db_name }} OWNER {{ pm_b_db_user }};\""
+  become_user: postgres

@@ -1,0 +1,15 @@
+# docker-compose.ia.yml
+# Simple compose file for IA service.
+
+version: "3.8"
+
+services:
+  ia:
+    build:
+      context: ./PM-B-ia
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000" # Expose IA API on host port 8000
+    env_file:
+      - ia.env
+    restart: unless-stopped

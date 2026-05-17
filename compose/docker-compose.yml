@@ -1,0 +1,23 @@
+# docker-compose.yml
+# Simple compose file for backend + frontend.
+
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./PM-B-backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080" # Expose Spring Boot on host port 8080
+    env_file:
+      - backend.env
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./PM-B-frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80" # Expose Nginx on host port 80
+    restart: unless-stopped

@@ -1,0 +1,15 @@
+--- # Start of docker role tasks.
+# This role installs Docker and Docker Compose.
+
+- name: Install Docker packages # Simple Docker install via Ubuntu repo.
+  apt: # Use apt package manager.
+    name: # Packages to install.
+      - docker.io # Docker engine.
+      - docker-compose # Docker Compose v1 (simple start).
+    state: present # Ensure packages are installed.
+
+- name: Enable and start Docker service # Make Docker run on boot.
+  service: # Manage system services.
+    name: docker # Docker service name.
+    state: started # Ensure it is running.
+    enabled: yes # Start on boot.

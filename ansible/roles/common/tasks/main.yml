@@ -1,0 +1,19 @@
+--- # Start of common role tasks.
+# This role performs basic system preparation.
+
+- name: Update apt package index # Refresh package list.
+  apt: # Use apt package manager.
+    update_cache: yes # Fetch latest package lists.
+    cache_valid_time: 3600 # Reuse cache for one hour.
+
+- name: Upgrade installed packages # Apply security and bug fixes.
+  apt: # Use apt package manager.
+    upgrade: dist # Full upgrade.
+
+- name: Install basic tools # Small set of useful packages.
+  apt: # Use apt package manager.
+    name: # List of packages to install.
+      - ca-certificates # SSL certificates for HTTPS.
+      - curl # Download and debug tool.
+      - unzip # Utility to unzip archives.
+    state: present # Ensure packages are installed.

@@ -1,0 +1,26 @@
+--- # Start of playbook file.
+# This playbook is intentionally simple for beginners.
+# It runs roles in a clean, predictable order.
+
+- name: Prepare and configure app servers # Play for app servers.
+  hosts: app # Target the [app] group from inventory.ini.
+  become: true # Run tasks with sudo privileges.
+  roles: # List of roles to run in order.
+    - common # Basic system setup.
+    - docker # Install Docker and Docker Compose.
+    - app # Prepare app deployment folder.
+
+- name: Prepare and configure db server # Play for db server.
+  hosts: db # Target the [db] group from inventory.ini.
+  become: true # Run tasks with sudo privileges.
+  roles: # List of roles to run in order.
+    - common # Basic system setup.
+    - db # Install database server.
+
+- name: Prepare and configure ia server # Play for IA server.
+  hosts: ia # Target the [ia] group from inventory.ini.
+  become: true # Run tasks with sudo privileges.
+  roles: # List of roles to run in order.
+    - common # Basic system setup.
+    - docker # Install Docker and Docker Compose.
+    - ia # Prepare IA deployment folder.

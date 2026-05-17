@@ -1,0 +1,69 @@
+--- # Start of ia role tasks.
+# This role prepares and deploys the IA service using GitHub repo.
+
+- name: Create ia directory # Folder to host docker-compose.yml.
+  file:
+    path: /opt/pm-b-ia
+    state: directory
+    mode: "0755"
+
+- name: Install git # Git is needed to clone the repo.
+  apt:
+    name: git
+    state: present
+
+- name: Clone ia repo # Download IA source code.
+  git:
+    repo: "https://github.com/jadliaissam-edu/PM-B-ia"
+    dest: /opt/pm-b-ia/PM-B-ia
+    update: yes
+    force: yes
+
+- name: Copy ia Dockerfile # Ensure Dockerfile exists on server.
+  copy:
+    src: "{{ playbook_dir }}/../../PM-B-ia/Dockerfile"
+    dest: /opt/pm-b-ia/PM-B-ia/Dockerfile
+    mode: "0644"
+
+- name: Check ia env file # Ensure secrets exist on controller.
+  stat:
+    path: "{{ playbook_dir }}/../ia.env"
+  delegate_to: localhost
+  become: false
+  run_once: true
+  register: ia_env_file_stat
+
+- name: Fail if ia env file is missing # Prevent broken deploys.
+  fail:
+    msg: "Missing {{ playbook_dir }}/../ia.env. Create it from ia.env.example before deployment."
+  when: not ia_env_file_stat.stat.exists
+  become: false
+  run_once: true
+
+- name: Copy ia env example # Reference file for operators.
+  copy:
+    src: "{{ playbook_dir }}/../ia.env.example"
+    dest: /opt/pm-b-ia/ia.env.example
+    mode: "0644"
+
+- name: Copy ia env file # Runtime secrets/config (gitignored locally).
+  copy:
+    src: "{{ playbook_dir }}/../ia.env"
+    dest: /opt/pm-b-ia/ia.env
+    mode: "0600"
+
+- name: Copy docker-compose.ia.yml # Compose file used on the server.
+  copy:
+    src: "{{ playbook_dir }}/../compose/docker-compose.ia.yml"
+    dest: /opt/pm-b-ia/docker-compose.yml
+    mode: "0644"
+
+- name: Stop existing containers cleanly # Avoid docker-compose recreate bugs.
+  command: docker-compose down
+  args:
+    chdir: /opt/pm-b-ia
+
+- name: Build and start containers # Run docker-compose on the server.
+  command: docker-compose up -d --build
+  args:
+    chdir: /opt/pm-b-ia
