@@ -125,6 +125,29 @@ resource "hcloud_load_balancer_service" "ia_http" { # IA service on port 8000.
   }
 } # End IA LB service.
 
+resource "hcloud_load_balancer_service" "ia_https" { # IA service on port 443.
+  load_balancer_id = hcloud_load_balancer.ia_lb.id   # Target IA LB id.
+  protocol         = "https"                         # HTTPS protocol.
+  listen_port      = 443                             # Public port.
+  destination_port = 8000                            # Forward to IA service port.
+
+  http {
+    certificates = [data.hcloud_certificate.mon_certificat_fixe.id]
+  }
+
+  health_check {
+    protocol = "http"
+    port     = 8000
+    interval = 15
+    timeout  = 10
+    retries  = 3
+    http {
+      path         = "/docs"
+      status_codes = ["2??", "3??"]
+    }
+  }
+} # End IA HTTPS service.
+
 resource "hcloud_load_balancer_target" "ia_target" { # Attach IA server to IA LB.
   type             = "server"                        # Target type is a server.
   load_balancer_id = hcloud_load_balancer.ia_lb.id   # IA LB id.
@@ -144,6 +167,31 @@ resource "hcloud_load_balancer_service" "http" {
   listen_port      = 80
   destination_port = 80
 }
+
+# ===================================================================================
+
+# 1. On récupère le certificat persistant créé manuellement dans la console
+data "hcloud_certificate" "mon_certificat_fixe" {
+  name = "managed-certificate-1" 
+  # Ou utilisez un filtre si vous n'avez pas mis de nom spécifique :
+  # with_selector = "app=prod"
+}
+
+# 2. On attache ce certificat au service HTTPS du Load Balancer
+resource "hcloud_load_balancer_service" "https_service" {
+  load_balancer_id = hcloud_load_balancer.lb.id
+  protocol         = "https"
+  listen_port      = 443
+  destination_port = 80 # Le port sur lequel vos conteneurs écoutent
+
+  http {
+    # On injecte l'ID du certificat récupéré par le bloc data
+    certificates = [data.hcloud_certificate.mon_certificat_fixe.id]
+  }
+}
+
+# ===================================================================================
+
 
 
 # # TEMP: Certificate disabled to avoid Let's Encrypt duplicate rate limit.
