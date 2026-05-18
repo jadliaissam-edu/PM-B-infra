@@ -32,23 +32,23 @@
     update: yes # Pull latest changes if already cloned.
     force: yes # Always reset local changes to match remote.
 
-- name: Copy backend Dockerfile # Ensure Dockerfile exists on server.
-  copy: # Copy a local file to the server.
-    src: "{{ playbook_dir }}/../../PM-B-backend/Dockerfile" # Local path.
-    dest: /opt/pm-b/PM-B-backend/Dockerfile # Target path on server.
-    mode: "0644" # File permissions.
+# - name: Copy backend Dockerfile # Ensure Dockerfile exists on server.
+#   copy: # Copy a local file to the server.
+#     src: "{{ playbook_dir }}/../../PM-B-backend/Dockerfile" # Local path.
+#     dest: /opt/pm-b/PM-B-backend/Dockerfile # Target path on server.
+#     mode: "0644" # File permissions.
 
-- name: Copy frontend Dockerfile # Ensure Dockerfile exists on server.
-  copy: # Copy a local file to the server.
-    src: "{{ playbook_dir }}/../../PM-B-frontend/Dockerfile" # Local path.
-    dest: /opt/pm-b/PM-B-frontend/Dockerfile # Target path on server.
-    mode: "0644" # File permissions.
+# - name: Copy frontend Dockerfile # Ensure Dockerfile exists on server.
+#   copy: # Copy a local file to the server.
+#     src: "{{ playbook_dir }}/../../PM-B-frontend/Dockerfile" # Local path.
+#     dest: /opt/pm-b/PM-B-frontend/Dockerfile # Target path on server.
+#     mode: "0644" # File permissions.
 
-- name: Copy nginx.conf # Nginx config for the React app.
-  copy: # Copy a local file to the server.
-    src: "{{ playbook_dir }}/../../PM-B-frontend/nginx.conf" # Local path.
-    dest: /opt/pm-b/PM-B-frontend/nginx.conf # Target path on server.
-    mode: "0644" # File permissions.
+# - name: Copy nginx.conf # Nginx config for the React app.
+#   copy: # Copy a local file to the server.
+#     src: "{{ playbook_dir }}/../../PM-B-frontend/nginx.conf" # Local path.
+#     dest: /opt/pm-b/PM-B-frontend/nginx.conf # Target path on server.
+#     mode: "0644" # File permissions.
 
 - name: Check backend env file # Ensure secrets exist on controller.
   stat:

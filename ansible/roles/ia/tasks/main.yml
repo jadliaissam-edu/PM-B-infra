@@ -19,11 +19,11 @@
     update: yes
     force: yes
 
-- name: Copy ia Dockerfile # Ensure Dockerfile exists on server.
-  copy:
-    src: "{{ playbook_dir }}/../../PM-B-ia/Dockerfile"
-    dest: /opt/pm-b-ia/PM-B-ia/Dockerfile
-    mode: "0644"
+# - name: Copy ia Dockerfile # Ensure Dockerfile exists on server.
+#   copy:
+#     src: "{{ playbook_dir }}/../../PM-B-ia/Dockerfile"
+#     dest: /opt/pm-b-ia/PM-B-ia/Dockerfile
+#     mode: "0644"
 
 - name: Check ia env file # Ensure secrets exist on controller.
   stat:
