@@ -172,7 +172,7 @@ resource "hcloud_load_balancer_service" "http" {
 
 # 1. On récupère le certificat persistant créé manuellement dans la console
 data "hcloud_certificate" "mon_certificat_fixe" {
-  name = "managed-certificate-1" 
+  name = "managed-certificate-1"
   # Ou utilisez un filtre si vous n'avez pas mis de nom spécifique :
   # with_selector = "app=prod"
 }
