@@ -5,6 +5,11 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      component:
+        description: "Partie a redeployer (backend|frontend|ia|all)"
+        required: false
+        default: "all"
 
 jobs:
   validate:
@@ -77,4 +82,4 @@ jobs:
 
       - name: Run deploy playbook
         working-directory: ansible
-        run: ansible-playbook -i inventory.ini site.yml --private-key ~/.ssh/pm-b-infra
+        run: ansible-playbook -i inventory.ini site.yml --private-key ~/.ssh/pm-b-infra --extra-vars "component=${{ github.event.inputs.component || 'all' }}"
