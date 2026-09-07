@@ -4,3 +4,19 @@ pm-b-infra.pub
 backend.env
 terraform/terraform.tfvars
 ia.env
+
+# Fichiers internes / brouillons
+plan.md
+test.py
+
+# Inventaire Ansible (contient les IP de production)
+ansible/inventory.ini
+
+# État et providers Terraform (peuvent contenir des secrets)
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+
+# Sous-module orphelin (copie du frontend)
+compose/PM-B-frontend/
